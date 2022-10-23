@@ -1,17 +1,15 @@
-# Maintainer: fft
+# Maintainer: fft <nobody@nowhere.no>
 
-pkgname=apr-2-svn
-pkgver=r1904787
+pkgname=libapr2-svn
+pkgver=1904787
 pkgrel=1
-pkgdesc='Apache Portable Runtime library. This is version 2 from SVN trunk, possibly unstable.'
-arch=('x86_64')
+pkgdesc='Apache Portable Runtime library. Version 2 from SVN trunk.'
+arch=('amd64')
 url='https://apr.apache.org/'
-depends=('expat') # libxml2 also supported
-makedepends=('svn')
+control_fields=('Priority: optional' 'Section: libs')
+depends=('libc6' 'expat') # libxml2 also supported
+makedepends=('subversion' 'libexpat-dev')
 optdepends=('python' 'sqlite')
-license=('APACHE')
-conflicts=(apr-2) # for the future, when APR 2 will be released.
-provides=(apr-2)
 source=("${pkgname}::svn+https://svn.apache.org/repos/asf/apr/apr/trunk/"
         'ship_find_apr.m4.patch'
         'fix-apr.pc.patch'
@@ -26,7 +24,7 @@ sha256sums=('SKIP'
 pkgver() {
   cd "${pkgname}"
   local ver="$(svnversion)"
-  printf "r%s" "${ver//[[:alpha:]]}"
+  printf "%s" "${ver//[[:alpha:]]}"
 }
 
 prepare() {
@@ -41,11 +39,13 @@ prepare() {
 
 build() {
   cd "${pkgname}"
-    ./configure --prefix=/usr --includedir=/usr/include/apr-2 \
+    ./configure --host=x86_64-linux-gnu --build=x86_64-linux-gnu \
+    --enable-layout=Debian \
+    --includedir=/usr/include/apr-2 \
+    --libdir=/usr/lib/x86_64-linux-gnu \
     --with-installbuilddir=/usr/share/apr-2/build \
     --enable-nonportable-atomics \
-    --with-devrandom=/dev/urandom --disable-static
-  sed -i -e 's/ -shared / -Wl,-O1,--as-needed\0/g' libtool
+    --enable-allocator-uses-mmap
   make
 }
 
@@ -57,5 +57,7 @@ check() {
 package() {
   cd "${pkgname}"
   make DESTDIR="${pkgdir}" install
-  rm "${pkgdir}/usr/lib/apr.exp" # conflict with apr package and seems useless on linux
+  chmod a-x "${pkgdir}/usr/lib/x86_64-linux-gnu/libapr-2.la" "${pkgdir}/usr/lib/x86_64-linux-gnu/libapr-2.so.0.0.0"
+  perl -p -i -e "s,^dependency_libs=.*,dependency_libs=''," "${pkgdir}/usr/lib/x86_64-linux-gnu/libapr-2.la"
+  rm "${pkgdir}/usr/lib/x86_64-linux-gnu/apr.exp" # conflict with apr package and seems useless on linux
 }
