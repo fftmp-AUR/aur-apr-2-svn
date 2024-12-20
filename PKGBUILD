@@ -1,7 +1,7 @@
 # Maintainer: fft
 
 pkgname=apr-2-svn
-pkgver=r1904787
+pkgver=r1922611
 pkgrel=2
 pkgdesc='Apache Portable Runtime library. This is version 2 from SVN trunk, possibly unstable.'
 arch=('x86_64')
@@ -9,7 +9,7 @@ url='https://apr.apache.org/'
 depends=('expat') # libxml2 also supported
 makedepends=('svn')
 optdepends=('python' 'sqlite')
-license=('APACHE')
+license=('Apache-2.0')
 conflicts=(apr-2) # for the future, when APR 2 will be released.
 provides=(apr-2)
 source=("${pkgname}::svn+https://svn.apache.org/repos/asf/apr/apr/trunk/"
